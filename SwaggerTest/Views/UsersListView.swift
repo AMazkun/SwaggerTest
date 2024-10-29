@@ -14,16 +14,16 @@ struct UsersListView: View {
     @ViewBuilder
     func Photo(urlString: String) -> some View {
         AsyncImage(url: URL(string: urlString)) { image in
-                image
-                    .resizable()
-                    .scaledToFill()
-                    .overlay(Material.ultraThin)
-            } placeholder: {
-                ProgressView()
-            }
-            .frame(width: 44, height: 44)
-            .background(Color.gray)
-            .clipShape(Circle())    }
+            image
+                .resizable()
+                .scaledToFill()
+                .overlay(Material.ultraThin)
+        } placeholder: {
+            ProgressView()
+        }
+        .frame(width: 44, height: 44)
+        .background(Color.gray)
+        .clipShape(Circle())    }
     
     @ViewBuilder
     func UserCard(user: User) -> some View {
@@ -38,39 +38,57 @@ struct UsersListView: View {
                     .multilineTextAlignment(.leading)
                     .nunitoSansFont(.Body2)
                 Text(user.position)
-                    .nunitoSansFont(.Body3)
+                    .nunitoSansFont(.Body1)
                 Text(user.email)
                     .lineLimit(1)
                     .nunitoSansFont(.Body3)
+                Text(phoneNumber(user.phone))
+                    .lineLimit(1)
+                    .nunitoSansFont(.Body1)
             }
         }
     }
     
     var body: some View {
-        GeometryReader { geometry in
-            VStack (alignment: .leading)  {
-                let lastUserId = userModel.users.last?.id
-                List(userModel.users) { user in
-                    UserCard(user: user)
-                        .onAppear {
-                            // Check if current item is last in the list
-                            if user.id == lastUserId {
-                                userModel.fetchUsersNextPage()
-                            }
+        VStack (alignment: .leading)  {
+            let lastUserId = userModel.users.last?.id
+            List(userModel.users) { user in
+                UserCard(user: user)
+                    .onAppear {
+                        // Check if current item is last in the list
+                        if user.id == lastUserId {
+                            userModel.fetchUsersNextPage()
                         }
-                }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
-                .frame(height: listHeight)
+                    }
             }
-            .onAppear {
-                userModel.fetchUsersFirstPage()
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .frame(height: listHeight)
+        }
+        .safeAreaInset(edge: .bottom){
+            if userModel.isLoading {
+                ProgressView()
+                    .controlSize(.large)
+                    .offset(y: -55)
             }
         }
+        .overlay{
+            if userModel.users.isEmpty {
+                ZStack{
+                    Color("backgroundColor")
+                    UsersListEmptyView()
+                }
+                
+            }
+        }
+        .onAppear {
+            userModel.fetchUsersFirstPage()
+        }
     }
+    
 }
 
 #Preview {
-    UsersListView(listHeight: 300)
+    UsersListView(listHeight: 770)
         .environmentObject(MokeData.shared.useMockData)
 }

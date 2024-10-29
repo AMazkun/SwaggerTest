@@ -57,12 +57,13 @@ struct ViewsSwitchings : View {
 
 struct ContentView: View {
     @EnvironmentObject private var userModel : UserModel
+    @EnvironmentObject private var networkMonitor : NetworkMonitor
     private let monitor = NWPathMonitor()
     @State private var selectedView: Views = .usersList
-    
+
     var body: some View {
         VStack {
-            if userModel.isConnected {
+            if networkMonitor.isConnected {
                 Rectangle()
                     .fill(Color("primaryColor"))
                     .overlay(
@@ -81,14 +82,12 @@ struct ContentView: View {
                             UsersListView(listHeight: geometry.size.height)
                         }
                     }
+                    .scrollDismissesKeyboard(.immediately)
                 }
-            
                 ViewsSwitchings(selectedView: $selectedView)
             } else {
                 NoNet()
             }
-        }
-        .onAppear {
         }
     }
 }
@@ -96,4 +95,5 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environmentObject(MokeData.shared.useMockData)
+        .environmentObject(MokeData.shared.networkMonitor)
 }

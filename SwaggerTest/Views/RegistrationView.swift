@@ -12,6 +12,8 @@ struct MovingPlaceholderTF: View {
     @Binding var text: String
     let errorText: String
     let color: Color
+    let keyboardType: UIKeyboardType
+    let autocapitalization: TextInputAutocapitalization?
     
     var body: some View {
         VStack (alignment: .leading)  {
@@ -22,6 +24,9 @@ struct MovingPlaceholderTF: View {
                     .foregroundStyle(color)
                     .offset(y: -shift)
                 TextField("", text: $text)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(autocapitalization)
+                    .keyboardType(keyboardType)
                     .offset(y: shift)
                     .nunitoSansFont(.Body2)
                     .frame(height: inpHeight)
@@ -48,7 +53,7 @@ struct RegistrationView: View {
 
     @ViewBuilder
     var NameInput: some View {
-        MovingPlaceholderTF(placeholder: "Name", text: $userModel.user.name, errorText: errorName,  color: colorName)
+        MovingPlaceholderTF(placeholder: "Name", text: $userModel.user.name, errorText: errorName,  color: colorName, keyboardType: .default, autocapitalization: .words)
             .onChange(of: userModel.user.name) {
                 errorName = userModel.validateName()
                 colorName = errorName.isEmpty ? .gray : .red
@@ -60,7 +65,7 @@ struct RegistrationView: View {
     
     @ViewBuilder
     var EmailInput: some View {
-        MovingPlaceholderTF(placeholder: "Email", text: $userModel.user.email, errorText: errorEmail,  color: colorEmail)
+        MovingPlaceholderTF(placeholder: "Email", text: $userModel.user.email, errorText: errorEmail,  color: colorEmail, keyboardType: .emailAddress, autocapitalization: .never)
             .onChange(of: userModel.user.email) {
                 errorEmail = userModel.validateEmail()
                 colorEmail = errorEmail.isEmpty ? .gray : .red
@@ -72,7 +77,7 @@ struct RegistrationView: View {
     
     @ViewBuilder
     var PhoneInput: some View {
-        MovingPlaceholderTF(placeholder: "Phone", text: $userModel.user.phone, errorText: errorPhone,  color: colorPhone)
+        MovingPlaceholderTF(placeholder: "Phone", text: $userModel.user.phone, errorText: errorPhone,  color: colorPhone, keyboardType: .phonePad, autocapitalization: .none)
             .onChange(of: userModel.user.phone) {
                 errorPhone = userModel.validatePhone()
                 colorPhone = errorPhone.isEmpty ? .gray : .red
@@ -108,6 +113,7 @@ struct RegistrationView: View {
     @State private var showingImagePicker = false
     @State private var showingCamera = false
     @State private var image: Image?
+    @State private var position_id: Int? = 0
     
     var body: some View {
         VStack {
@@ -126,15 +132,12 @@ struct RegistrationView: View {
                 
                 
                 ForEach(userModel.positions) { position in
-                    RadioButton(tag: position.id, selection: $userModel.position_id, label: position.name)
+                    RadioButton(tag: position.id, selection: $position_id, label: position.name)
                 }.padding(.leading)
                 
             }
             .padding()
             .padding(.top, 8)
-            
-            Spacer()
-            
             
             Button(action: {
                 userModel.fetchToken {
@@ -150,24 +153,30 @@ struct RegistrationView: View {
                     .disabled(disabled)
                 
             })
-            .padding()
-            
-            Spacer()
-            
+                        
             if let errorMessage = userModel.errorMessage {
+                let _=print("errorMessage", errorMessage)
                 Text(errorMessage)
                     .foregroundColor(.red)
                     .padding()
             }
+            
             if let successMessage = userModel.successMessage {
+                let _=print("successMessage", successMessage)
                 Text(successMessage)
                     .foregroundColor(.green)
                     .padding()
             }
             
         }
+        .onChange(of: position_id) { _, newPosition in
+            userModel.user.position_id = newPosition ?? 0
+        }
         .onAppear {
             userModel.fetchPositions()
+            if let firstPositionId = userModel.positions.first?.id {
+                position_id = firstPositionId
+            }
         }
         .confirmationDialog("Choose how you want to add a photo", isPresented: $showingPhotoSource, titleVisibility: .visible) {
             Button("Camera") {

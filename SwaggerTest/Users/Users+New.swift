@@ -30,8 +30,8 @@ extension UserModel {
     func validateEmail() -> String {
         func isValidEmail(_ email: String) -> Bool {
             //let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
-            let emailRegex = #"^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:a-z0-9?\.)+a-z0-9?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$"#
-            let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegex)
+            let emailRegEx = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"
+            let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
             return emailPred.evaluate(with: email)
         }
 
@@ -61,6 +61,7 @@ extension UserModel {
     }
     
     func registerUser() {
+        self.errorMessage = nil
         guard validateInputs() else { return }
 
         guard let url = URL(string: "https://frontend-test-assignment-api.abz.agency/api/v1/users") else {
@@ -72,13 +73,13 @@ extension UserModel {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(token, forHTTPHeaderField: "Token")
-
-
+        
         var formData = MultipartFormData()
         formData.addField(name: "name", value: user.name)
         formData.addField(name: "email", value: user.email)
         formData.addField(name: "phone", value: user.phone)
         formData.addField(name: "position_id", value: String(user.position_id))
+        print(#function, user)
 
         if let imageData = UIImage(named: "NoRegisteredImg")?.jpegData(compressionQuality: 0.6) {
             formData.addFileField(name: "photo", fileName: "c21a2hc21a2hc21a.jpg", mimeType: "image/jpeg", fileData: imageData)
@@ -97,10 +98,10 @@ extension UserModel {
                     throw URLError(.unknown)
                 }
                 switch statusCode {
-                case .ok:
+                case .created:
                     return output.data
                 default :
-                    try self.responseStatusCode(statusCode)
+                    try self.responseStatusCode(statusCode, output.data)
                 }
                 return output.data
             }
@@ -110,25 +111,32 @@ extension UserModel {
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished:
-                    self.errorMessage = ""
+                    self.errorMessage = nil
                 case .failure(let error):
                     self.handleUserRegisterError(error)
                 }
             }, receiveValue: { [weak self] response in
                 self?.successMessage = response.message
+                self?.user.id = response.user_id ?? 0
             })
             .store(in: &cancellables)
     }
     
     private func handleUserRegisterError(_ error: Error) {
+
+
         if let registrationError = error as? RegistrationError {
             switch registrationError {
             case .expiredToken:
                 errorMessage = "The token expired."
-            case .userExists:
-                errorMessage = "User with this phone or email already exists."
+            case .userExists(let data):
+                if let userExistsError = try? JSONDecoder().decode(OtherResponse.self, from: data ?? Data()) {
+                    errorMessage = userExistsError.message
+                } else {
+                    errorMessage = "User with this phone or email already exists."
+                }
             case .validationFailed(let data):
-                if let validationError = try? JSONDecoder().decode(ValidationErrorResponse.self, from: data) {
+                if let validationError = try? JSONDecoder().decode(ValidationErrorResponse.self, from: data ?? Data()) {
                     errorMessage = validationError.message + ": " + validationError.fails.map { "\($0.key): \($0.value.joined(separator: ", "))" }.joined(separator: "; ")
                 } else {
                     errorMessage = "Validation failed."
@@ -137,6 +145,7 @@ extension UserModel {
         } else {
             failureProcess(error)
         }
+        print(#function, error.localizedDescription, errorMessage ?? "no message")
     }
     
     func fetchToken( completion: @escaping () -> Void) {

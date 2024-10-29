@@ -9,6 +9,8 @@ import Foundation
 
 extension UserModel {
     func fetchPositions() {
+        self.errorMessage = nil
+
         guard let url = URL(string: "https://frontend-test-assignment-api.abz.agency/api/v1/positions") else {
             errorMessage = "Invalid URL"
             return
@@ -26,7 +28,7 @@ extension UserModel {
                     case .ok, .created, .accepted, .noContent:
                         return output.data
                     default :
-                        try self.responseStatusCode(statusCode)
+                        try self.responseStatusCode(statusCode, output.data)
                 }
                 return output.data
 
@@ -36,17 +38,13 @@ extension UserModel {
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished:
-                    self.errorMessage = ""
+                    break
                 case .failure(let error):
                     self.failureProcess(error)
                 }
             }, receiveValue: { [weak self] response in
                 if response.success, let positions = response.positions {
                     self?.positions = positions
-                    if let firstPositionId = positions.first?.id {
-                        self?.position_id = firstPositionId
-                    }
-
                 } else {
                     self?.errorMessage = response.message ?? "Failed to fetch positions."
                 }
@@ -59,7 +57,6 @@ extension UserModel {
             switch urlError.code {
             case .notConnectedToInternet:
                 self.errorMessage = "Error fetching positions: No internet connection"
-                self.isConnected = false;
             default:
                 self.errorMessage = "Error fetching positions: \(error.localizedDescription)"
             }

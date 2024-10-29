@@ -19,6 +19,8 @@ enum HTTPStatusCode: Int {
     case unauthorized = 401
     case forbidden = 403
     case notFound = 404
+    case duplicateEntry = 409
+    case jsonError = 422
     case internalServerError = 500
     case serviceUnavailable = 503
 
@@ -29,24 +31,31 @@ enum HTTPStatusCode: Int {
         case .accepted: return "Accepted"
         case .noContent: return "No Content"
         case .badRequest: return "Bad Request"
-        case .unauthorized: return "Unauthorized"
+        case .unauthorized: return "Expired token response"
         case .forbidden: return "Forbidden"
         case .notFound: return "Not Found"
+        case .jsonError: return "A JSON object containing errors"
         case .internalServerError: return "Internal Server Error"
         case .serviceUnavailable: return "Service Unavailable"
+        case .duplicateEntry: return "Phone or email already exists in database response"
         }
     }
 }
 
 enum RegistrationError: Error {
     case expiredToken
-    case userExists
-    case validationFailed(data: Data)
+    case userExists(data: Data?)
+    case validationFailed(data: Data?)
 }
 
 struct RegistrationResponse: Codable {
     let success: Bool
     let user_id: Int?
+    let message: String
+}
+
+struct OtherResponse: Codable {
+    let success: Bool
     let message: String
 }
 

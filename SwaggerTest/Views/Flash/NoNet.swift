@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct NoNet: View {
-    @EnvironmentObject private var userModel : UserModel
+    @EnvironmentObject private var networkMonitor : NetworkMonitor
     var body: some View {
         VStack(spacing: 30) {
             Image("NoInet")
@@ -17,7 +17,7 @@ struct NoNet: View {
                 .nunitoSansFont(.Body2)
             
             Button(action: {
-                userModel.isConnected = true;
+                networkMonitor.isConnected = true
             }, label: {
                 Text("Try again")
                     .nunitoSansFont(.Body2)
@@ -31,14 +31,9 @@ struct NoNet: View {
     }
 }
 
-//struct NoNetTests : View {
-//    @State var isPresent: Bool = true
-//    var body: some View {
-//        NoNet(isPresent: $isPresent)
-//    }
-//}
+
 
 #Preview {
-    //NoNetTests()
     NoNet()
+        .environmentObject(MokeData.shared.networkMonitor)
 }

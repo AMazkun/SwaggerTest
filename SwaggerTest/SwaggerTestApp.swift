@@ -10,10 +10,12 @@ import SwiftUI
 @main
 struct SwaggerTestApp: App {
     @StateObject var model: UserModel = .init()
+    @StateObject private var networkMonitor = NetworkMonitor()
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(model)
+                .environmentObject(networkMonitor)
         }
     }
 }
