@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "closure #2 in UserModel.registerUser():Users+New.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #3 in UserModel.fetchPositions():JobPositions.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #2 in UserModel.fetchToken(completion:):Users+New.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in UserModel.registerUser():Users+New.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "response.statusCode">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>
