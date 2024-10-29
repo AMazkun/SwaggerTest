@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+let rawHeight : CGFloat = 56
+let inpHeight : CGFloat = 24
+
+let backgroundGray = Color(red: 0.973, green: 0.973, blue: 0.973)
 enum FontSetting {
     case Heading1
     case Body1
@@ -24,10 +28,10 @@ enum FontSetting {
     
     var linespacing: CGFloat {
         switch self {
-        case .Heading1: return 24
-        case .Body1: return 24
-        case .Body2: return 24
-        case .Body3: return 20
+        case .Heading1: return 4
+        case .Body1: return 5
+        case .Body2: return 6
+        case .Body3: return 6
         }
     }
 }

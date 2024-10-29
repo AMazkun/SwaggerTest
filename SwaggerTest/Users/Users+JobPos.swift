@@ -19,23 +19,26 @@ extension UserModel {
                 guard let response = output.response as? HTTPURLResponse else {
                     throw URLError(.badServerResponse)
                 }
-                switch response.statusCode {
-                case 200:
-                    return output.data
-                case 404, 422:
-                    throw URLError(.badServerResponse)
-                default:
+                guard let statusCode = HTTPStatusCode(rawValue: response.statusCode) else {
                     throw URLError(.unknown)
                 }
+                switch statusCode {
+                    case .ok, .created, .accepted, .noContent:
+                        return output.data
+                    default :
+                        try self.responseStatusCode(statusCode)
+                }
+                return output.data
+
             }
             .decode(type: PositionsResponse.self, decoder: JSONDecoder())
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished:
-                    break
+                    self.errorMessage = ""
                 case .failure(let error):
-                    self.errorMessage = "Error fetching positions: \(error.localizedDescription)"
+                    self.failureProcess(error)
                 }
             }, receiveValue: { [weak self] response in
                 if response.success, let positions = response.positions {
@@ -49,6 +52,19 @@ extension UserModel {
                 }
             })
             .store(in: &cancellables)
+    }
+    
+    func failureProcess(_ error: Error) {
+        if let urlError = error as? URLError {
+            switch urlError.code {
+            case .notConnectedToInternet:
+                self.errorMessage = "Error fetching positions: No internet connection"
+                self.isConnected = false;
+            default:
+                self.errorMessage = "Error fetching positions: \(error.localizedDescription)"
+            }
+        }
+        self.errorMessage = "Error fetching positions: \(error.localizedDescription)"
     }
 }
 

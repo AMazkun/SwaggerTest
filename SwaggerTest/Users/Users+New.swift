@@ -14,13 +14,24 @@ extension UserModel {
         guard user.phone.starts(with: "+380") && user.phone.count == 13 else {
             return "Phone number should start with +380."
         }
+        
+        func isValidphone(_ phone: String) -> Bool {
+            let phoneRegEx = "[+]{0,1}380([0-9]{9})"
+            let phonePred = NSPredicate(format:"SELF MATCHES %@", phoneRegEx)
+            return phonePred.evaluate(with: phone)
+        }
+
+        guard isValidphone(user.phone) else {
+            return "Invalid phone number format."
+        }
         return ""
     }
 
     func validateEmail() -> String {
         func isValidEmail(_ email: String) -> Bool {
-            let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
-            let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
+            //let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+            let emailRegex = #"^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:a-z0-9?\.)+a-z0-9?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$"#
+            let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegex)
             return emailPred.evaluate(with: email)
         }
 
@@ -82,27 +93,26 @@ extension UserModel {
                 guard let response = output.response as? HTTPURLResponse else {
                     throw URLError(.badServerResponse)
                 }
-                switch response.statusCode {
-                case 201:
-                    return output.data
-                case 401:
-                    throw RegistrationError.expiredToken
-                case 409:
-                    throw RegistrationError.userExists
-                case 422:
-                    throw RegistrationError.validationFailed(data: output.data)
-                default:
-                    throw URLError(.badServerResponse)
+                guard let statusCode = HTTPStatusCode(rawValue: response.statusCode) else {
+                    throw URLError(.unknown)
                 }
+                switch statusCode {
+                case .ok:
+                    return output.data
+                default :
+                    try self.responseStatusCode(statusCode)
+                }
+                return output.data
             }
+
             .decode(type: RegistrationResponse.self, decoder: JSONDecoder())
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished:
-                    break
+                    self.errorMessage = ""
                 case .failure(let error):
-                    self.handleError(error)
+                    self.handleUserRegisterError(error)
                 }
             }, receiveValue: { [weak self] response in
                 self?.successMessage = response.message
@@ -110,7 +120,7 @@ extension UserModel {
             .store(in: &cancellables)
     }
     
-    private func handleError(_ error: Error) {
+    private func handleUserRegisterError(_ error: Error) {
         if let registrationError = error as? RegistrationError {
             switch registrationError {
             case .expiredToken:
@@ -125,7 +135,7 @@ extension UserModel {
                 }
             }
         } else {
-            errorMessage = error.localizedDescription
+            failureProcess(error)
         }
     }
     
@@ -146,7 +156,7 @@ extension UserModel {
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished:
-                    break
+                    self.errorMessage = ""
                 case .failure(let error):
                     self.errorMessage = "Error fetching token: \(error.localizedDescription)"
                 }

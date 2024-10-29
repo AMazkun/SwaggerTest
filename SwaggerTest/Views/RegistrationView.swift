@@ -7,9 +7,6 @@
 
 import SwiftUI
 
-fileprivate let rawHeight : CGFloat = 56
-fileprivate let inpHeight : CGFloat = 24
-
 struct MovingPlaceholderTF: View {
     let placeholder: String
     @Binding var text: String
@@ -45,28 +42,6 @@ struct RegistrationView: View {
     //@StateObject private var userModel = UserModel()
     @EnvironmentObject private var userModel : UserModel
 
-    
-    @ViewBuilder
-    var ButtonRebon: some View {
-        HStack(alignment: .center) {
-            Spacer()
-            HStack{
-                Image("UsersImg")
-                    .renderingMode(.template)
-                Text("Users")
-            }.padding(.top)
-            Spacer()
-            HStack{
-                Image("NoUserImg")
-                    .renderingMode(.template)
-                Text("Sign up")
-            }.padding(.top)
-            Spacer()
-        }
-        .background(backgroundGray)
-
-    }
-    
     @State private var colorName: Color = .gray
     @State private var errorName: String = ""
     
@@ -129,7 +104,6 @@ struct RegistrationView: View {
         .border(colorPhoto)
     }
     
-    let backgroundGray = Color(red: 0.973, green: 0.973, blue: 0.973)
     @State private var showingPhotoSource = false
     @State private var showingImagePicker = false
     @State private var showingCamera = false
@@ -137,14 +111,6 @@ struct RegistrationView: View {
     
     var body: some View {
         VStack {
-            Rectangle()
-                .fill(Color("primaryColor"))
-                .overlay(
-                    Text("Working with POST request")
-                        .nunitoSansFont(.Heading1)
-                        .padding()
-                )
-                .frame(height: rawHeight)
             
             VStack (alignment: .leading, spacing: 16) {
                 NameInput
@@ -198,8 +164,6 @@ struct RegistrationView: View {
                     .foregroundColor(.green)
                     .padding()
             }
-            
-            ButtonRebon
             
         }
         .onAppear {
