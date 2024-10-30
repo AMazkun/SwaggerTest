@@ -61,30 +61,44 @@ struct ContentView: View {
     private let monitor = NWPathMonitor()
     @State private var selectedView: Views = .usersList
 
+    @ViewBuilder
+    private var Banner: some View {
+        Rectangle()
+            .fill(Color("primaryColor"))
+            .overlay(
+                Text(selectedView.name)
+                    .nunitoSansFont(.Heading1)
+                    .padding()
+            )
+            .frame(height: rawHeight)
+    }
+    
+    @ViewBuilder
+    private var Main: some View {
+        GeometryReader { geometry in
+            ScrollView {
+                switch selectedView {
+                case .registration:
+                    RegistrationView()
+                case .usersList:
+                    UsersListView(listHeight: geometry.size.height)
+                }
+            }
+            .scrollDismissesKeyboard(.immediately)
+        }
+
+    }
+    
     var body: some View {
         VStack {
             if networkMonitor.isConnected {
-                Rectangle()
-                    .fill(Color("primaryColor"))
-                    .overlay(
-                        Text(selectedView.name)
-                            .nunitoSansFont(.Heading1)
-                            .padding()
-                    )
-                    .frame(height: rawHeight)
+            
+                Banner
                 
-                GeometryReader { geometry in
-                    ScrollView {
-                        switch selectedView {
-                        case .registration:
-                            RegistrationView()
-                        case .usersList:
-                            UsersListView(listHeight: geometry.size.height)
-                        }
-                    }
-                    .scrollDismissesKeyboard(.immediately)
-                }
+                Main
+                
                 ViewsSwitchings(selectedView: $selectedView)
+                
             } else {
                 NoNet()
             }
@@ -94,6 +108,6 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .environmentObject(MokeData.shared.useMockData)
+        .environmentObject(MokeData.shared.userMockDataError)
         .environmentObject(MokeData.shared.networkMonitor)
 }

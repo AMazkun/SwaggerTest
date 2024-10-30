@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct SingUpSucces: View {
+    @EnvironmentObject private var userModel : UserModel
     var body: some View {
         VStack(spacing: 30) {
             Image("RegisteredImg")
@@ -16,6 +17,7 @@ struct SingUpSucces: View {
                 .nunitoSansFont(.Body2)
             
             Button(action: {
+                userModel.successMessage = nil
             }, label: {
                 Text("Got it")
                     .nunitoSansFont(.Body2)
@@ -31,4 +33,5 @@ struct SingUpSucces: View {
 
 #Preview {
     SingUpSucces()
+        .environmentObject(MokeData.shared.userMockDataError)
 }

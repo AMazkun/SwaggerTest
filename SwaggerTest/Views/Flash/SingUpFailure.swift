@@ -8,14 +8,16 @@
 import SwiftUI
 
 struct SingUpFailure: View {
+    @EnvironmentObject private var userModel : UserModel
     var body: some View {
         VStack(spacing: 30) {
             Image("NoRegisteredImg")
             
-            Text("User successfully registered")
-                .nunitoSansFont(.Body2)
+            Text(userModel.errorMessage ?? "Unknown registration error")
+                .nunitoSansFont(.Heading1)
             
             Button(action: {
+                userModel.errorMessage = nil
             }, label: {
                 Text("Got it")
                     .nunitoSansFont(.Body2)
@@ -31,4 +33,5 @@ struct SingUpFailure: View {
 
 #Preview {
     SingUpFailure()
+        .environmentObject(MokeData.shared.userMockDataError)
 }

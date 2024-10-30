@@ -6,6 +6,7 @@
 //
 import Foundation
 import Combine
+import SwiftUI
 
 let usersPerPage = 6
 
@@ -24,5 +25,5 @@ class UserModel: ObservableObject {
     
     @Published var successMessage: String? = nil
     @Published var errorMessage: String? = nil
-    
+    var avatar: UIImage? = nil
 }

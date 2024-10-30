@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct MovingPlaceholderTF: View {
     let placeholder: String
@@ -84,8 +85,13 @@ struct RegistrationView: View {
             }
     }
     
+    @State private var showingPhotoSource = false
+    @State private var showingImagePicker = false
+    @State private var showingCamera = false
+    @State private var avatar: Image?
     @State private var colorPhoto: Color = .gray
     @State private var errorPhoto: String = ""
+    @State private var pickerItem: PhotosPickerItem?
     
     @ViewBuilder
     var PhotoInput: some View {
@@ -107,17 +113,40 @@ struct RegistrationView: View {
         }
         .frame(height: rawHeight)
         .border(colorPhoto)
+        .confirmationDialog("Choose how you want to add a photo", isPresented: $showingPhotoSource, titleVisibility: .visible) {
+            Button("Camera") {
+            }
+
+            Button("Gallary") {
+                showingImagePicker.toggle()
+            }
+
+            Button("Cancel", role: .cancel) {
+            }
+        }
+        .photosPicker(isPresented: $showingImagePicker, selection: $pickerItem)
+        .onChange(of: pickerItem) {
+            Task {
+                avatar = try await pickerItem?.loadTransferable(type: Image.self)
+            }
+        }
     }
     
-    @State private var showingPhotoSource = false
-    @State private var showingImagePicker = false
-    @State private var showingCamera = false
-    @State private var image: Image?
     @State private var position_id: Int? = 0
+
+    @ViewBuilder
+    var PositionInput: some View {
+        Text("Select your position")
+            .nunitoSansFont(.Body1)
+        
+        
+        ForEach(userModel.positions) { position in
+            RadioButton(tag: position.id, selection: $position_id, label: position.name)
+        }.padding(.leading)
+    }
     
-    var body: some View {
-        VStack {
-            
+    var RegistrationForm: some View {
+        VStack{
             VStack (alignment: .leading, spacing: 16) {
                 NameInput
                 
@@ -127,14 +156,7 @@ struct RegistrationView: View {
                 
                 PhotoInput
                 
-                Text("Select your position")
-                    .nunitoSansFont(.Body1)
-                
-                
-                ForEach(userModel.positions) { position in
-                    RadioButton(tag: position.id, selection: $position_id, label: position.name)
-                }.padding(.leading)
-                
+                PositionInput
             }
             .padding()
             .padding(.top, 8)
@@ -153,19 +175,17 @@ struct RegistrationView: View {
                     .disabled(disabled)
                 
             })
-                        
-            if let errorMessage = userModel.errorMessage {
-                let _=print("errorMessage", errorMessage)
-                Text(errorMessage)
-                    .foregroundColor(.red)
-                    .padding()
-            }
-            
-            if let successMessage = userModel.successMessage {
-                let _=print("successMessage", successMessage)
-                Text(successMessage)
-                    .foregroundColor(.green)
-                    .padding()
+        }
+    }
+    
+    var body: some View {
+        VStack {
+            if userModel.errorMessage != nil {
+                SingUpFailure()
+            } else if userModel.successMessage != nil {
+                SingUpSucces()
+            } else {
+                RegistrationForm
             }
             
         }
@@ -177,16 +197,8 @@ struct RegistrationView: View {
             if let firstPositionId = userModel.positions.first?.id {
                 position_id = firstPositionId
             }
-        }
-        .confirmationDialog("Choose how you want to add a photo", isPresented: $showingPhotoSource, titleVisibility: .visible) {
-            Button("Camera") {
-            }
-
-            Button("Gellary") {
-            }
-
-            Button("Cancel", role: .cancel) {
-            }
+            //userModel.errorMessage = "Here error message - a long string to show"
+            //userModel.successMessage = "No metter what to show"
         }
 
     }
@@ -194,5 +206,5 @@ struct RegistrationView: View {
 
 #Preview {
     RegistrationView()
-        .environmentObject(MokeData.shared.useMockData)
+        .environmentObject(MokeData.shared.userMockData)
 }

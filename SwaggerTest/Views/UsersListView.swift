@@ -78,7 +78,6 @@ struct UsersListView: View {
                     Color("backgroundColor")
                     UsersListEmptyView()
                 }
-                
             }
         }
         .onAppear {
@@ -90,5 +89,5 @@ struct UsersListView: View {
 
 #Preview {
     UsersListView(listHeight: 770)
-        .environmentObject(MokeData.shared.useMockData)
+        .environmentObject(MokeData.shared.userMockData)
 }
