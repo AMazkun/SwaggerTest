@@ -74,10 +74,7 @@ struct UsersListView: View {
         }
         .overlay{
             if userModel.users.isEmpty {
-                ZStack{
-                    Color("backgroundColor")
-                    UsersListEmptyView()
-                }
+                UsersListEmptyView()
             }
         }
         .onAppear {

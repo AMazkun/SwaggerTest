@@ -10,25 +10,29 @@ import SwiftUI
 struct SingUpFailure: View {
     @EnvironmentObject private var userModel : UserModel
     var body: some View {
-        VStack(spacing: 30) {
-            Image("NoRegisteredImg")
+        ZStack {
+            Color("backgroundColor")
             
-            Text(userModel.errorMessage ?? "Unknown registration error")
-                .nunitoSansFont(.Heading1)
-            
-            Button(action: {
-                userModel.errorMessage = nil
-            }, label: {
-                Text("Got it")
-                    .nunitoSansFont(.Body2)
-                    .padding()
-                    .frame(width: 140)
-                    .background(Color("primaryColor"), in: Capsule())
+            VStack(spacing: 30) {
+                Image("NoRegisteredImg")
                 
-            })
+                Text(userModel.errorMessage ?? "Unknown registration error")
+                    .nunitoSansFont(.Heading1)
+                
+                Button(action: {
+                    userModel.errorMessage = nil
+                }, label: {
+                    Text("Got it")
+                        .nunitoSansFont(.Body2)
+                        .padding()
+                        .frame(width: 140)
+                        .background(Color("primaryColor"), in: Capsule())
+                    
+                })
+            }
+            .padding()
         }
-        .padding()
-    }
+   }
 }
 
 #Preview {

@@ -3,38 +3,12 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "closure #3 in UserModel.fetchPositions():JobPositions.swift">
-      </ContextState>
-      <ContextState
          contextName = "closure #1 in UserModel.registerUser():Users+New.swift">
          <PersistentStrings>
             <PersistentString
                value = "response.statusCode">
             </PersistentString>
          </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "closure #2 in UserModel.fetchToken(completion:):Users+New.swift">
-      </ContextState>
-      <ContextState
-         contextName = "UserModel.registerUser():Users+New.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "output">
-            </PersistentString>
-            <PersistentString
-               value = "formData.httpBody as String">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "closure #2 in UserModel.registerUser():Users+New.swift">
-      </ContextState>
-      <ContextState
-         contextName = "UserModel.fetchUsersNextPage():Users+Get.swift">
-      </ContextState>
-      <ContextState
-         contextName = "UserModel.responseStatusCode(_:_:):Users+Get.swift">
       </ContextState>
       <ContextState
          contextName = "UserModel.handleUserRegisterError(_:):Users+New.swift">
@@ -45,7 +19,36 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "UserModel.registerUser():Users+New.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "formData.httpBody as String">
+            </PersistentString>
+            <PersistentString
+               value = "output">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #2 in UserModel.fetchToken(completion:):Users+New.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #2 in UserModel.registerUser():Users+New.swift">
+      </ContextState>
+      <ContextState
+         contextName = "UserModel.fetchUsersNextPage():Users+Get.swift">
+      </ContextState>
+      <ContextState
          contextName = "UserModel.failureProcess(_:):JobPositions.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in closure #3 in RegistrationView.PhotoInput.getter:RegistrationView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "UserModel.responseStatusCode(_:_:):Users+Get.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #3 in UserModel.fetchPositions():JobPositions.swift">
       </ContextState>
    </ContextStates>
 </VariablesViewState>

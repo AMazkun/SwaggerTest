@@ -10,24 +10,28 @@ import SwiftUI
 struct SingUpSucces: View {
     @EnvironmentObject private var userModel : UserModel
     var body: some View {
-        VStack(spacing: 30) {
-            Image("RegisteredImg")
-            
-            Text("User successfully registered")
-                .nunitoSansFont(.Body2)
-            
-            Button(action: {
-                userModel.successMessage = nil
-            }, label: {
-                Text("Got it")
-                    .nunitoSansFont(.Body2)
-                    .padding()
-                    .frame(width: 140)
-                    .background(Color("primaryColor"), in: Capsule())
+        ZStack {
+            Color("backgroundColor")
+
+            VStack(spacing: 30) {
+                Image("RegisteredImg")
                 
-            })
+                Text("User successfully registered")
+                    .nunitoSansFont(.Body2)
+                
+                Button(action: {
+                    userModel.successMessage = nil
+                }, label: {
+                    Text("Got it")
+                        .nunitoSansFont(.Body2)
+                        .padding()
+                        .frame(width: 140)
+                        .background(Color("primaryColor"), in: Capsule())
+                    
+                })
+            }
+            .padding()
         }
-        .padding()
     }
 }
 

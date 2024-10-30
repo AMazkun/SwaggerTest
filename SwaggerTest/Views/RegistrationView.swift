@@ -88,14 +88,15 @@ struct RegistrationView: View {
     @State private var showingPhotoSource = false
     @State private var showingImagePicker = false
     @State private var showingCamera = false
-    @State private var avatar: Image?
+    @State private var avatar: UIImage? = nil
+    @State private var pickerItem: PhotosPickerItem?
+
     @State private var colorPhoto: Color = .gray
     @State private var errorPhoto: String = ""
-    @State private var pickerItem: PhotosPickerItem?
     
     @ViewBuilder
     var PhotoInput: some View {
-        VStack {
+        VStack (alignment: .leading) {
             HStack {
                 Text("Upload your photo")
                     .nunitoSansFont(.Body2)
@@ -105,14 +106,19 @@ struct RegistrationView: View {
                     showingPhotoSource.toggle()
                 }
                 , label: {
-                    Text("Upload")
+                    Text(avatar == nil ? "Upload" : "Done")
                         .nunitoSansFont(.Body2)
                 }
                 )
             }.padding()
+            .frame(height: rawHeight)
+            .border(colorPhoto)
+
+            Text(errorPhoto.isEmpty ? " " : "\(errorPhoto)")
+                .foregroundStyle(colorPhoto)
+                .nunitoSansFont(.Body3)
+                .padding(.leading)
         }
-        .frame(height: rawHeight)
-        .border(colorPhoto)
         .confirmationDialog("Choose how you want to add a photo", isPresented: $showingPhotoSource, titleVisibility: .visible) {
             Button("Camera") {
             }
@@ -126,8 +132,14 @@ struct RegistrationView: View {
         }
         .photosPicker(isPresented: $showingImagePicker, selection: $pickerItem)
         .onChange(of: pickerItem) {
-            Task {
-                avatar = try await pickerItem?.loadTransferable(type: Image.self)
+            Task { @MainActor in
+                if let data = try? await pickerItem?.loadTransferable(type: Data.self) {
+                    self.avatar = UIImage(data:data)
+                    userModel.avatar = avatar
+                    self.errorPhoto = userModel.validatePhoto()
+                    self.colorPhoto = errorPhoto.isEmpty ? .gray : .red
+                    return
+                }
             }
         }
     }
@@ -166,7 +178,7 @@ struct RegistrationView: View {
                     userModel.registerUser()
                 }
             }, label: {
-                let disabled = !userModel.validateInputs()
+                let disabled = !userModel.validateInputs(silent: true)
                 Text("Sign up")
                     .nunitoSansFont(.Body2)
                     .padding()
@@ -180,15 +192,15 @@ struct RegistrationView: View {
     
     var body: some View {
         VStack {
+            RegistrationForm
+        }
+        .overlay(content: {
             if userModel.errorMessage != nil {
                 SingUpFailure()
             } else if userModel.successMessage != nil {
                 SingUpSucces()
-            } else {
-                RegistrationForm
             }
-            
-        }
+        })
         .onChange(of: position_id) { _, newPosition in
             userModel.user.position_id = newPosition ?? 0
         }

@@ -49,15 +49,29 @@ extension UserModel {
     }
 
     func validatePhoto() -> String {
-        guard user.photo.count <= 5 * 1024 * 1024 else {
-            return  "Photo size must not exceed 5MB."
+        if let avatar = avatar {
+            if let avatarJpeg = avatar.jpegData(compressionQuality: 0.6) {
+                let avatarSize = avatarJpeg.count
+                //print(#function, "avatarSize: \(avatarSize), maxSize: \(5 * 1024 * 1024), width: \(avatar.size.width), height: \(avatar.size.height)")
+                guard avatarSize <= 5 * 1024 * 1024 && avatar.size.width >= 70 && avatar.size.height  >= 70 else {
+                    return  "Photo size must be from 70x70 but not exceed 5MB."
+                }
+            }
+
+        } else {
+            return  "No photo selected."
         }
         return ""
     }
 
     
-    func validateInputs() -> Bool {
-        return validatePhoto().isEmpty && validateName().isEmpty && validateEmail().isEmpty && validatePhone().isEmpty
+    func validateInputs(silent : Bool = false) -> Bool {
+        let res = validatePhoto() + validateName() + validateEmail() + validatePhone()
+        if !res.isEmpty {
+            if (!silent) {errorMessage = res}
+            return false
+        }
+        return true
     }
     
     func registerUser() {
@@ -81,8 +95,8 @@ extension UserModel {
         formData.addField(name: "position_id", value: String(user.position_id))
         print(#function, user)
 
-        if let imageData = UIImage(named: "NoRegisteredImg")?.jpegData(compressionQuality: 0.6) {
-            formData.addFileField(name: "photo", fileName: "c21a2hc21a2hc21a.jpg", mimeType: "image/jpeg", fileData: imageData)
+        if let imageData = avatar?.jpegData(compressionQuality: 0.6) {
+            formData.addFileField(name: "photo", fileName: "\(user.name.replacingOccurrences(of: " ", with: "")).jpg", mimeType: "image/jpeg", fileData: imageData)
         }
         
         request.setValue(formData.getContentType(), forHTTPHeaderField: "Content-Type")
@@ -165,7 +179,7 @@ extension UserModel {
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished:
-                    self.errorMessage = ""
+                    self.errorMessage = nil
                 case .failure(let error):
                     self.errorMessage = "Error fetching token: \(error.localizedDescription)"
                 }

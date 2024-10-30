@@ -12,7 +12,7 @@ import Network
 final class NetworkMonitor : ObservableObject {
     private let networkMonitor = NWPathMonitor()
     private let workerQueue = DispatchQueue(label: "Monitor")
-    @Published var isConnected : Bool = false
+    @Published var isConnected : Bool = true
     {
         didSet {
             print("isConnected", isConnected)

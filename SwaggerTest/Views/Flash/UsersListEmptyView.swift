@@ -9,13 +9,16 @@ import SwiftUI
 
 struct UsersListEmptyView: View {
     var body: some View {
-        VStack(spacing: 30) {
-            Image("3UserImg")
-            
-            Text("There are no users yet")
-                .nunitoSansFont(.Heading1)
+        ZStack{
+            Color("backgroundColor")
+            VStack(spacing: 30) {
+                Image("3UserImg")
+                
+                Text("There are no users yet")
+                    .nunitoSansFont(.Heading1)
+            }
+            .padding()
         }
-        .padding()
     }
 }
 
