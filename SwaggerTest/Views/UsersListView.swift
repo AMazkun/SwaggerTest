@@ -50,36 +50,41 @@ struct UsersListView: View {
     }
     
     var body: some View {
-        VStack (alignment: .leading)  {
-            let lastUserId = userModel.users.last?.id
-            List(userModel.users) { user in
-                UserCard(user: user)
-                    .onAppear {
-                        // Check if current item is last in the list
-                        if user.id == lastUserId {
-                            userModel.fetchUsersNextPage()
+        VStack {
+            VStack (alignment: .leading)  {
+                let lastUserId = userModel.users.last?.id
+                List(userModel.users) { user in
+                    UserCard(user: user)
+                        .onAppear {
+                            // Check if current item is last in the list
+                            if user.id == lastUserId {
+                                userModel.fetchUsersNextPage()
+                            }
                         }
-                    }
+                }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                
             }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
-            .frame(height: listHeight)
-        }
-        .safeAreaInset(edge: .bottom){
+            .overlay{
+                if userModel.users.isEmpty {
+                    UsersListEmptyView()
+                }
+            }
+            .onAppear {
+                userModel.fetchUsersFirstPage()
+            }
+            
             if userModel.isLoading {
-                ProgressView()
-                    .controlSize(.large)
-                    .offset(y: -55)
+                ZStack {
+                    Color.background
+                    
+                    ProgressView()
+                        .controlSize(.large)
+                }.frame(height: 100)
             }
         }
-        .overlay{
-            if userModel.users.isEmpty {
-                UsersListEmptyView()
-            }
-        }
-        .onAppear {
-            userModel.fetchUsersFirstPage()
-        }
+        .frame(height: listHeight)
     }
     
 }

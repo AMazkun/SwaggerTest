@@ -13,11 +13,11 @@ final class NetworkMonitor : ObservableObject {
     private let networkMonitor = NWPathMonitor()
     private let workerQueue = DispatchQueue(label: "Monitor")
     @Published var isConnected : Bool = true
-    {
-        didSet {
-            print("isConnected", isConnected)
-        }
-    }
+//    {
+//        didSet {
+//            print("isConnected", isConnected)
+//        }
+//    }
     
     init() {
         networkMonitor.pathUpdateHandler = { path in
